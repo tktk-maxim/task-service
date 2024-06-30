@@ -1,0 +1,11 @@
+[tool.pytest.ini_options]
+
+pythonpath = [
+    ".", "src"
+]
+asyncio_mode="auto"
+
+[tool.aerich]
+tortoise_orm = "config.DATABASE_CONFIG"
+location = "./migrations"
+src_folder = "./src\\"
