@@ -7,6 +7,9 @@ from fastapi import FastAPI
 from config import get_db_url
 
 
+from routers.projects import router as router_project
+
+
 @asynccontextmanager
 async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     print(f"Connecting DB {get_db_url()}")
@@ -22,6 +25,13 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="Task service", lifespan=lifespan)
+
+
+app.include_router(
+    router=router_project,
+    prefix="/project",
+    tags=["Project"]
+)
 
 
 @app.get("/")
