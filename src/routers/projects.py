@@ -1,5 +1,6 @@
-from fastapi import APIRouter
 from typing import List
+from fastapi import APIRouter
+
 
 from crud import create_entity, get_all_entity, get_entity, update_entity, delete_entity
 from models import Project

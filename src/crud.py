@@ -1,5 +1,6 @@
-from fastapi import HTTPException
 from typing import List, TypeVar, Type
+from fastapi import HTTPException
+
 
 from pydantic import BaseModel
 from tortoise import Model
@@ -13,9 +14,9 @@ AnyTortoiseModel = TypeVar('AnyTortoiseModel', bound=Model)
 async def checking_id_for_existence(tortoise_model_class: Type[AnyTortoiseModel], entity_id: int):
     try:
         await tortoise_model_class.get(id=entity_id)
-    except DoesNotExist:
+    except DoesNotExist as e:
         raise HTTPException(status_code=404,
-                            detail=f"{tortoise_model_class.__name__} obj with id: {entity_id} not found")
+                            detail=f"{tortoise_model_class.__name__} obj with id: {entity_id} not found") from e
 
 
 async def create_entity(tortoise_model_class: Type[AnyTortoiseModel],
@@ -49,4 +50,3 @@ async def delete_entity(tortoise_model_class: Type[AnyTortoiseModel], entity_id:
         raise HTTPException(status_code=404,
                             detail=f"{tortoise_model_class.__name__} obj with id: {entity_id} not found")
     return {"deleted": True}
-
