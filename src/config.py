@@ -31,3 +31,15 @@ def get_db_url(test: bool) -> str:
                 f'@{settings.test_db_host}:{settings.test_db_port}/{settings.test_db_name}')
     return (f'postgres://{settings.db_user}:{settings.db_password}'
             f'@{settings.db_host}:{settings.db_port}/{settings.db_name}')
+
+
+DATABASE_CONFIG = {
+    "connections": {"default": f"postgres://{settings.db_user}:{settings.db_password}"
+                               f"@{settings.db_host}:{settings.db_port}/{settings.db_name}"},
+    "apps": {
+        "models": {
+            "models": ["models", "aerich.models"],
+            "default_connection": "default",
+        },
+    },
+}
