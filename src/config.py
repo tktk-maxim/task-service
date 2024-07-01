@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     db_host: str
     db_port: str
     db_name: str
+
+    run_test: bool
+
     test_db_user: str = None
     test_db_password: str = None
     test_db_host: str = None
@@ -22,7 +25,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def get_db_url(test: bool = False) -> str:
+def get_db_url(test: bool) -> str:
     if test:
         return (f'postgres://{settings.test_db_user}:{settings.test_db_password}'
                 f'@{settings.test_db_host}:{settings.test_db_port}/{settings.test_db_name}')
