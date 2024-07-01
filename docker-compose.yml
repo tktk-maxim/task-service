@@ -1,0 +1,25 @@
+
+services:
+  web:
+    build: ./
+    container_name: api
+    working_dir: /src
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+    env_file:
+      - .env-non-dev
+
+
+  db:
+    image: postgres:14
+    container_name: db_postgres
+    command: -p 5436
+    expose:
+      - 5436
+    env_file:
+      - .env-non-dev
+
+
