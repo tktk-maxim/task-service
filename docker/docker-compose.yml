@@ -1,0 +1,22 @@
+
+services:
+  web:
+    build: ../.
+    container_name: api-task-service
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+    env_file:
+      - $env
+    command: ["pytest", "tests", "--cov"]
+
+
+  db:
+    image: postgres:14
+    container_name: database-task-service
+    command: -p 5436
+    expose:
+      - 5436
+    env_file:
+      - $env

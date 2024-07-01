@@ -1,0 +1,6 @@
+
+services:
+  web:
+    build: ../.
+    container_name: api-task-service
+    command: ["pylint","--verbose", "src"]

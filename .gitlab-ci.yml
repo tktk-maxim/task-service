@@ -1,0 +1,37 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - review
+
+build:
+  stage: build
+  tags:
+    - runner-for-task-service
+  script:
+    - docker compose -f docker/docker-compose.yml down
+    - docker compose -f docker/docker-compose.yml build
+
+
+test:
+  stage: test
+  tags:
+    - runner-for-task-service
+  script:
+    - docker compose -f docker/docker-compose.yml up  --abort-on-container-exit
+  dependencies:
+    - build
+
+review:
+  stage: review
+  tags:
+    - runner-for-task-service
+  only:
+    - develop
+    - ci
+  script:
+    - docker compose -f docker/docker-compose-lint.yml up  --abort-on-container-exit
