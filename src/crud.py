@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from tortoise import Model
 from tortoise.exceptions import DoesNotExist
 
+from models import Task
+
 
 AnyPydanticModel = TypeVar('AnyPydanticModel', bound=BaseModel)
 AnyTortoiseModel = TypeVar('AnyTortoiseModel', bound=Model)
@@ -50,3 +52,20 @@ async def delete_entity(tortoise_model_class: Type[AnyTortoiseModel], entity_id:
         raise HTTPException(status_code=404,
                             detail=f"{tortoise_model_class.__name__} obj with id: {entity_id} not found")
     return {"deleted": True}
+
+
+async def search_task(name: str, description: str, project_id: int) -> List[Task]:
+
+    response = Task.all()
+
+    flag = False
+    if name != "":
+        flag = True
+        response = response.filter(name=name)
+    if description != "":
+        flag = True
+        response = response.filter(description=description)
+    if project_id != -1:
+        flag = True
+        response = response.filter(project_id=project_id)
+    return await response if flag else []

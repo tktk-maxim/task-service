@@ -39,3 +39,5 @@ async def update_project_view(project_id: int, project: ProjectCreate):
 @router.delete("/{project_id}", response_model=dict)
 async def delete_project_view(project_id: int):
     return await delete_entity(tortoise_model_class=Project, entity_id=project_id)
+
+

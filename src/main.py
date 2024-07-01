@@ -3,11 +3,11 @@ from typing import AsyncGenerator
 from tortoise.contrib.fastapi import RegisterTortoise
 
 from fastapi import FastAPI
-
 from config import get_db_url, settings
 
 
 from routers.projects import router as router_project
+from routers.tasks import router as router_task
 
 
 @asynccontextmanager
@@ -31,6 +31,13 @@ app.include_router(
     router=router_project,
     prefix="/project",
     tags=["Project"]
+)
+
+
+app.include_router(
+    router=router_task,
+    prefix="/task",
+    tags=["Task"]
 )
 
 
