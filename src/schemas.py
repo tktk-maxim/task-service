@@ -19,7 +19,10 @@ class ProjectIn(ProjectCreate):
 class TaskCreate(BaseModel):
     name: str
     description: str
-    time_complete_in_days: int | None = Field(default=None, null=True)
+    estimated_days_to_complete: int
+    actual_days_to_complete: int | None = Field(default=None, null=True)
+    hours_spent: int | None = Field(default=None, null=True)
+    employee_id: int | None = Field(default=None, null=True)
     project_id: int
 
     @field_validator('name', 'description')

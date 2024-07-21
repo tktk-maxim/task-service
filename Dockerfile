@@ -8,4 +8,4 @@ COPY . .
 
 CMD ["aerich", "upgrade"]
 
-EXPOSE 8000
+EXPOSE 8001

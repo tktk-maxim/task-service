@@ -8,7 +8,7 @@ async def test_positive_create_task(client: AsyncClient) -> None:
     response = await client.post("/task/create/", json={
         "name": "Task-1",
         "description": "T-Description",
-        "time_complete_in_days": 3,
+        "estimated_days_to_complete": 3,
         "project_id": project.json()["id"]
     })
     assert response.json()["name"] == "Task-1"
@@ -19,7 +19,7 @@ async def test_negative_create_without_name(client: AsyncClient) -> None:
     response = await client.post("/task/create/", json={
         "name": "",
         "description": "T-Description",
-        "time_complete_in_days": 3,
+        "estimated_days_to_complete": 3,
         "project_id": "str"
     })
     assert response.status_code == 422
@@ -31,7 +31,7 @@ async def test_negative_create_task(client: AsyncClient) -> None:
     response = await client.post("/task/create/", json={
         "name": "Task-1",
         "description": "T-Description",
-        "time_complete_in_days": 3,
+        "estimated_days_to_complete": 3,
         "project_id": "str"
     })
     assert response.status_code == 422
@@ -47,7 +47,7 @@ async def test_positive_update_task(client: AsyncClient) -> None:
     response = await client.put(f"/task/{task_id}", json={
         "name": "Task-1",
         "description": "NEW-Description",
-        "time_complete_in_days": 3,
+        "estimated_days_to_complete": 3,
         "project_id": response.json()[-1]["project_id"]
     })
     assert response.status_code == 200

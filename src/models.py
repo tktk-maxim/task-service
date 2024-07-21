@@ -13,7 +13,10 @@ class Project(Model):
 class Task(Model):
     name = fields.CharField(max_length=255)
     description = fields.TextField()
-    time_complete_in_days = fields.IntField(null=True)
+    estimated_days_to_complete = fields.IntField()
+    actual_days_to_complete = fields.IntField(null=True)
+    hours_spent = fields.IntField(null=True)
+    employee_id = fields.IntField(null=True)
     project = fields.ForeignKeyField('models.Project', on_delete=fields.CASCADE)
 
     def __str__(self):
