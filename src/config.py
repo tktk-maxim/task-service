@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     db_port: str
     db_name: str
 
+    host: str
+    host_port: str
+
     run_test: bool
 
     test_db_user: str = None
@@ -17,6 +20,9 @@ class Settings(BaseSettings):
     test_db_host: str = None
     test_db_port: str = None
     test_db_name: str = None
+
+    user_service_host: str
+    user_service_port: str
 
     class Config:
         env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')

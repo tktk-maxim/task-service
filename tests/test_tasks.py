@@ -54,6 +54,26 @@ async def test_positive_update_task(client: AsyncClient) -> None:
     assert response.json()["description"] == "NEW-Description"
 
 
+# @pytest.mark.anyio
+# async def test_positive_assign_task_employee(client: AsyncClient) -> None:
+#     response = await client.get("/task/all/")
+#     assert response.status_code == 200
+#     task_id = response.json()[-1]["id"]
+#     response = await client.patch(f"/task/{task_id}", json={"employee_id": 1})
+#     assert response.status_code == 200
+#     assert response.json()["employee_id"] == 1
+
+
+@pytest.mark.anyio
+async def test_positive_add_hours_spent(client: AsyncClient) -> None:
+    response = await client.get("/task/all/")
+    assert response.status_code == 200
+    task_id = response.json()[-1]["id"]
+    response = await client.patch(f"/task/add_hours/{task_id}?hours=4")
+    assert response.status_code == 200
+    assert response.json()["hours_spent"] == 4
+
+
 @pytest.mark.anyio
 async def test_positive_get_task(client: AsyncClient) -> None:
     response = await client.get("/task/all/")
@@ -91,6 +111,33 @@ async def test_positive_search_task(client: AsyncClient) -> None:
     response = await client.get(f"/task/search/?project_id={task_project_id}")
     assert response.status_code == 200
     assert response.json()[0]["project_id"] == task_project_id
+
+
+# @pytest.mark.anyio
+# async def test_positive_filter_task(client: AsyncClient) -> None:
+#     response = await client.get("/task/all/")
+#     task_employee_id = response.json()[-1]["employee_id"]
+#     task_project_id = response.json()[-1]["project_id"]
+#     task_estimated_days_to_complete = response.json()[-1]["estimated_days_to_complete"]
+#
+#     response = await client.get(f"/task/filter/?employee_id={task_employee_id}&project_id={task_project_id}")
+#     assert response.status_code == 200
+#     assert response.json()[0]["project_id"] == task_project_id
+#
+#     response = await client.get(f"/task/filter/?employee_id={task_employee_id}"
+#                                 f"&more_days_to_complete={task_estimated_days_to_complete - 1}")
+#     assert response.status_code == 200
+#     assert response.json()[0]["estimated_days_to_complete"] > task_estimated_days_to_complete - 1
+
+
+@pytest.mark.anyio
+async def test_positive_sort_tasks(client: AsyncClient) -> None:
+    response = await client.get("/task/all/")
+    count_tasks = len(response.json())
+    response = await client.get(f"/task/sort/?done=true")
+    assert response.status_code == 200
+    assert count_tasks == len(response.json())
+    assert response.json()[0]["done"] == False
 
 
 @pytest.mark.anyio

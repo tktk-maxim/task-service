@@ -1,12 +1,15 @@
 
 services:
-  web:
+  api:
     build: ./
-    container_name: api
+    container_name: api-task-service
     working_dir: /src
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+    command: >
+      sh -c "uvicorn main:app --host ${HOST} --port ${HOST_PORT}"
+    networks:
+      - my-network
     ports:
-      - "8001:8001"
+      - "${HOST_PORT}:${HOST_PORT}"
     depends_on:
       - db
     env_file:
@@ -15,11 +18,19 @@ services:
 
   db:
     image: postgres:14
-    container_name: db_postgres
+    container_name: db-task-service
+    networks:
+      - my-network
     command: -p 5436
+    ports:
+      - "${DB_PORT}:5436"
     expose:
-      - 5436
+      - "${DB_PORT}"
     env_file:
       - .env-non-dev
 
 
+networks:
+  my-network:
+    driver: bridge
+    external: true

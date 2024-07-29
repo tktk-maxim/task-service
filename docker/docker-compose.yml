@@ -1,22 +1,23 @@
 
 services:
-  web:
+  api:
     build: ../.
-    container_name: api-task-service
+    container_name: api-task-service-ci-cd
     ports:
-      - "8001:8000"
+      - "${HOST_PORT}:${HOST_PORT}"
     depends_on:
       - db
     env_file:
       - $env
-    command: ["pytest", "tests", "--cov"]
-
 
   db:
     image: postgres:14
-    container_name: database-task-service
+    container_name: db-task-service-ci-cd
     command: -p 5436
+    ports:
+      - "${DB_PORT}:5436"
     expose:
-      - 5436
+      - "${DB_PORT}"
     env_file:
       - $env
+

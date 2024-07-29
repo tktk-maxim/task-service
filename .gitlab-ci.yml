@@ -22,7 +22,9 @@ test:
   tags:
     - runner-for-task-service
   script:
-    - docker compose -f docker/docker-compose.yml up  --abort-on-container-exit
+    - docker compose -f docker/docker-compose.yml up -d db
+    - docker compose -f docker/docker-compose.yml run --rm api pytest tests --cov
+    - docker compose -f docker/docker-compose.yml stop db
   dependencies:
     - build
 
@@ -31,4 +33,5 @@ review:
   tags:
     - runner-for-task-service
   script:
-    - docker compose -f docker/docker-compose-lint.yml up  --abort-on-container-exit
+    - docker compose -f docker/docker-compose.yml run --rm api pylint --verbose src
+    - docker compose -f docker/docker-compose.yml down

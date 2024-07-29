@@ -1,10 +1,12 @@
 from typing import List, TypeVar, Type
 from fastapi import HTTPException
+import httpx
 
 
 from pydantic import BaseModel
 from tortoise import Model
 from tortoise.exceptions import DoesNotExist
+import datetime
 
 from models import Task
 
@@ -20,6 +22,18 @@ async def checking_id_for_existence(tortoise_model_class: Type[AnyTortoiseModel]
         raise HTTPException(status_code=404,
                             detail=f"{tortoise_model_class.__name__} obj with id: {entity_id} not found") from e
 
+
+async def checking_employee_for_assign_task(url: str):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+        events = response.json()["events"]
+        current_date = datetime.date.today().isoformat()
+        for event in events:
+            if event.begin <= current_date <= event.end:
+                raise HTTPException(status_code=422,
+                                    detail='It is impossible to assign a task to an employee on vacation/business trip')
 
 async def create_entity(tortoise_model_class: Type[AnyTortoiseModel],
                         entity: AnyPydanticModel) -> AnyTortoiseModel:
@@ -69,3 +83,41 @@ async def search_task(name: str, description: str, project_id: int) -> List[Task
         flag = True
         response = response.filter(project_id=project_id)
     return await response if flag else []
+
+
+async def assign_task_employee(url: str, task_id: int, employee_id: int):
+    await checking_id_for_existence(Task, task_id)
+    await checking_employee_for_assign_task(url=url)
+
+    await Task.filter(id=task_id).update(employee_id=employee_id)
+    return await get_entity(Task, task_id)
+
+
+async def add_hours_spent(task_id: int, hours: int):
+    await checking_id_for_existence(Task, task_id)
+    task = await Task.get(id=task_id)
+    await Task.filter(id=task_id).update(hours_spent=task.hours_spent+hours)
+    return await Task.filter(id=task_id).get()
+
+
+async def filter_tasks(filter_param: AnyPydanticModel, employee_id: int) -> List[Task]:
+    params = {key: value for key, value in filter_param.dict().items() if value is not None}
+
+    if "more_days_to_complete" in params.keys():
+        params["estimated_days_to_complete__gt"] = params.pop("more_days_to_complete")
+    if "less_days_to_complete" in params.keys():
+        params["estimated_days_to_complete__lt"] = params.pop("less_days_to_complete")
+
+    response = Task.filter(employee_id=employee_id, **params).all()
+    return await response
+
+
+async def sort_tasks(sort_param: AnyPydanticModel) -> List[Task]:
+    params = []
+
+    for key, value in sort_param.dict().items():
+        if value is not None:
+            params.append(key) if value else params.append(f"-{key}")
+
+    response = await Task.all().order_by(*params)
+    return response
