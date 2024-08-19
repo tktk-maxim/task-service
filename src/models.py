@@ -19,6 +19,7 @@ class Task(Model):
     employee_id = fields.IntField(null=True)
     done = fields.BooleanField(default=False, null=True)
     project = fields.ForeignKeyField('models.Project', on_delete=fields.CASCADE)
+    date_of_receiving = fields.CharField(max_length=255, null=True)
 
     def __str__(self):
         return self.name

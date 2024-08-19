@@ -6,7 +6,7 @@ import httpx
 from pydantic import BaseModel
 from tortoise import Model
 from tortoise.exceptions import DoesNotExist
-import datetime
+from datetime import datetime
 
 from models import Task
 
@@ -29,11 +29,12 @@ async def checking_employee_for_assign_task(url: str):
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
         events = response.json()["events"]
-        current_date = datetime.date.today().isoformat()
+        current_date = datetime.now().date()
         for event in events:
             if event.begin <= current_date <= event.end:
                 raise HTTPException(status_code=422,
                                     detail='It is impossible to assign a task to an employee on vacation/business trip')
+
 
 async def create_entity(tortoise_model_class: Type[AnyTortoiseModel],
                         entity: AnyPydanticModel) -> AnyTortoiseModel:
@@ -89,7 +90,9 @@ async def assign_task_employee(url: str, task_id: int, employee_id: int):
     await checking_id_for_existence(Task, task_id)
     await checking_employee_for_assign_task(url=url)
 
-    await Task.filter(id=task_id).update(employee_id=employee_id)
+    current_date = datetime.now().date()
+
+    await Task.filter(id=task_id).update(employee_id=employee_id, date_of_receiving=current_date)
     return await get_entity(Task, task_id)
 
 
@@ -121,3 +124,19 @@ async def sort_tasks(sort_param: AnyPydanticModel) -> List[Task]:
 
     response = await Task.all().order_by(*params)
     return response
+
+
+async def get_burning_tasks() -> List[Task]:
+    tasks = await get_all_entity(Task)
+
+    current_date = datetime.now().date()
+    burning_tasks = []
+    for task in tasks:
+        if task.employee_id is not None:
+
+            if 0 <= ((datetime.strptime(task.date_of_receiving, "%Y-%m-%d").date()
+                     - current_date).days + task.estimated_days_to_complete) < 4:
+                if not task.done:
+                    burning_tasks.append(task)
+
+    return burning_tasks

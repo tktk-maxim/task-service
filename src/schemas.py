@@ -1,4 +1,7 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field, field_validator
+from datetime import date
 
 
 class ProjectCreate(BaseModel):
@@ -25,6 +28,7 @@ class TaskCreate(BaseModel):
     employee_id: int | None = Field(default=None, null=True)
     done: bool | None = Field(default=False, null=True)
     project_id: int
+    date_of_receiving: date | None = Field(default=None, null=True)
 
     @field_validator('name', 'description')
     def not_empty(cls, value):
@@ -57,3 +61,4 @@ class TaskSort(BaseModel):
     employee_id: bool | None = Field(default=None, null=True)
     done: bool | None = Field(default=None, null=True)
     project_id: bool | None = Field(default=None, null=True)
+    date_of_receiving: bool | None = Field(default=None, null=True)

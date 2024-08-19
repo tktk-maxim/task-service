@@ -3,10 +3,15 @@ from fastapi import APIRouter, Depends
 
 from crud import (create_entity, get_all_entity, get_entity, update_entity, delete_entity,
                   search_task, checking_id_for_existence, assign_task_employee, add_hours_spent,
-                  filter_tasks, checking_employee_for_assign_task, sort_tasks)
+                  filter_tasks, checking_employee_for_assign_task, sort_tasks, get_burning_tasks)
 from models import Task, Project
 from schemas import TaskIn, TaskCreate, TaskUpdateEmployeeId, TaskFilter, TaskSort
 from config import settings
+
+from datetime import datetime
+
+current_date = datetime.now().strftime("%Y-%m-%d")
+
 
 router = APIRouter(
     tags=["Task"]
@@ -19,6 +24,8 @@ async def create_task_view(task: TaskCreate):
     if task.employee_id:
         await checking_employee_for_assign_task(url=f"http://{settings.user_service_host}:{settings.user_service_port}"
                                                     f"/employee/card/{task.employee_id}")
+        if not task.date_of_receiving:
+            task.date_of_receiving = current_date
     task_obj = await create_entity(tortoise_model_class=Task, entity=task)
     return task_obj
 
@@ -41,6 +48,8 @@ async def update_task_view(task_id: int, task: TaskCreate):
     if task.employee_id:
         await checking_employee_for_assign_task(url=f"http://{settings.user_service_host}:{settings.user_service_port}"
                                                     f"/employee/card/{task.employee_id}")
+        if not task.date_of_receiving:
+            task.date_of_receiving = current_date
     task_obj = await update_entity(tortoise_model_class=Task, entity=task, entity_id=task_id)
     return await task_obj
 
@@ -60,7 +69,9 @@ async def assign_task_employee_view(task_id: int, task_update_employee_id: TaskU
     task_obj = await assign_task_employee(url=f"http://{settings.user_service_host}:{settings.user_service_port}"
                                               f"/employee/card/{task_update_employee_id.employee_id}",
                                           task_id=task_id,
-                                          employee_id=task_update_employee_id.employee_id)
+                                          employee_id=task_update_employee_id.employee_id
+                                          )
+
     return await task_obj
 
 
@@ -81,3 +92,8 @@ async def filter_tasks_view(employee_id: int, filter_param: TaskFilter = Depends
 async def sort_tasks_view(sort_param: TaskSort = Depends()):
     tasks = await sort_tasks(sort_param=sort_param)
     return tasks
+
+
+@router.get("/burning_tasks/", response_model=List[TaskIn])
+async def get_burning_tasks_view():
+    return await get_burning_tasks()
